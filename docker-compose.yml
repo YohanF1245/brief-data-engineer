@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  sqlite:
+    image: nouchka/sqlite3
+    container_name: sqlite
+    hostname: sqlite
+    ports:
+      - "777:777"
+    volumes:
+      - ./sqlite:/sqlite
+    stdin_open: true
+    tty: true
+    command: sh
+      
+  python-app:
+    build:
+      context: /app/.
+      dockerfile: Dockerfile
+    container_name: python-app
+    depends_on:
+      - sqlite
+    ports:
+      - "666:666"
+    volumes:
+      - ./sqlite:/sqlite
