@@ -16,7 +16,12 @@ cursor.execute(
     """
 )
 
-
-
-
-
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS shops (
+        shop_id INTEGER PRIMARY KEY,
+        shop_location TEXT NOT NULL,
+        shop_employees INTEGER NOT NULL
+    )
+    """
+)
