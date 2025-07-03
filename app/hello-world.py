@@ -49,8 +49,7 @@ cursor.execute(
     CREATE TABLE IF NOT EXISTS Revenues(
         revenue_id INTEGER PRIMARY KEY AUTOINCREMENT,
         revenue_amount INTEGER NOT NULL,
-        created_at NUMERIC NOT NULL,
-        PRIMARY KEY(revenue_id)
+        created_at NUMERIC NOT NULL
     );
     """
 )
@@ -62,7 +61,6 @@ cursor.execute(
         amount_sold_by_town TEXT NOT NULL,
         created_at NUMERIC NOT NULL,
         shop_id INTEGER NOT NULL,
-        PRIMARY KEY(units_sold_by_town),
         FOREIGN KEY(shop_id) REFERENCES Shops(shop_id)
     );
     """
@@ -75,7 +73,6 @@ cursor.execute(
         amount_sold_by_product INTEGER NOT NULL,
         created_at NUMERIC NOT NULL,
         product_id TEXT NOT NULL,
-        PRIMARY KEY(units_sold_by_product_id),
         FOREIGN KEY(product_id) REFERENCES Products(product_id)
     );
     """
