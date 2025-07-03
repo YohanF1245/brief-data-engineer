@@ -16,5 +16,5 @@ A sale have a shop ID
 
 ## Shops
 A shop have an shop ID
-A shop is located in a town
+A shop is located in 1 town
 A shop have 0 or N employees
