@@ -3,13 +3,11 @@ version: '3.8'
 services:
   data-api:
     build:
-      context: /api/.
+      context: ./api/
       dockerfile: Dockerfile
     container_name: data-api
     ports:
       - "555:555"
-    volumes:
-      - ./api:/api
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:555/"]
       interval: 30s
@@ -29,7 +27,7 @@ services:
 
   python-app:
     build:
-      context: /app/.
+      context: ./app/
       dockerfile: Dockerfile
     container_name: python-app
     depends_on:
