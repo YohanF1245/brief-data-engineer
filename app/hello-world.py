@@ -3,6 +3,7 @@ print("Hello, World!")
 import sqlite3
 import requests
 from datetime import datetime
+from decimal import Decimal
 # Database creation
 conn = sqlite3.connect('/sqlite/data-engineer.db')
 
@@ -13,7 +14,7 @@ cursor.execute(
     CREATE TABLE IF NOT EXISTS products (
         product_id TEXT PRIMARY KEY,
         product_name TEXT NOT NULL,
-        product_price FLOAT NOT NULL,
+        product_price INTEGER NOT NULL,
         product_stock INTEGER NOT NULL
     )
     """
@@ -39,10 +40,47 @@ cursor.execute(
         PRIMARY KEY(product_id, shop_id, created_at),
         FOREIGN KEY(product_id) REFERENCES Products(product_id),
         FOREIGN KEY(shop_id) REFERENCES Shops(shop_id)
-
     )
     """
 )
+
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS Revenues(
+        revenue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        revenue_amount INTEGER NOT NULL,
+        created_at NUMERIC NOT NULL,
+        PRIMARY KEY(revenue_id)
+    );
+    """
+)
+
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS Units_sold_by_town(
+        units_sold_by_town_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount_sold_by_town TEXT NOT NULL,
+        created_at NUMERIC NOT NULL,
+        shop_id INTEGER NOT NULL,
+        PRIMARY KEY(units_sold_by_town),
+        FOREIGN KEY(shop_id) REFERENCES Shops(shop_id)
+    );
+    """
+)
+
+cursor.execute(
+    """
+        CREATE TABLE IF NOT EXISTS Units_sold_by_product(
+        units_sold_by_product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount_sold_by_product INTEGER NOT NULL,
+        created_at NUMERIC NOT NULL,
+        product_id TEXT NOT NULL,
+        PRIMARY KEY(units_sold_by_product_id),
+        FOREIGN KEY(product_id) REFERENCES Products(product_id)
+    );
+    """
+)
+
 
 # connect to the api
 url = "http://data-api:555/api"
@@ -59,7 +97,7 @@ for product in products:
     #prepare data for insertion
     product_id = product['ID Référence produit']
     name = product['Nom']
-    price = float(product['Prix'])
+    price = int(product['Prix'].replace('.', ''))
     stock = int(product['Stock'])
     cursor.execute(
         """
@@ -97,14 +135,108 @@ for sale in sales:
     #convert date to timestamp
     created_at = int(datetime.strptime(sale['Date'], '%Y-%m-%d').timestamp())
     quantity_sold = int(sale['Quantité'])
+
+    #check if sale already exists
+    sale_exists = False
     cursor.execute(
         """
-        INSERT OR IGNORE INTO sales (product_id, shop_id, created_at, quantity_sold) VALUES (?, ?, ?, ?)
+        SELECT * FROM sales WHERE product_id = ? AND shop_id = ? AND created_at = ? AND quantity_sold = ?
         """,
         (product_id, shop_id, created_at, quantity_sold)
     )
+    if cursor.fetchone():
+        sale_exists = True 
+    
+    #insert sale if it doesn't exist
+    if not sale_exists:
+        cursor.execute(
+            """
+            INSERT OR IGNORE INTO sales (product_id, shop_id, created_at, quantity_sold) VALUES (?, ?, ?, ?)
+            """,
+            (product_id, shop_id, created_at, quantity_sold)
+        )
+    else:
+        print("Sale is already in the database")
     conn.commit()
 
-  
+#   SELECT SUM(s.quantity_sold * p.product_price)
+#    ...> FROM products AS p
+#    ...> INNER JOIN sales AS s
+#    ...> ON p.product_id = s.product_id;
 
+#calculate total revenue
+cursor.execute(
+    """
+    SELECT SUM(s.quantity_sold * p.product_price) 
+    FROM products AS p 
+    INNER JOIN sales AS s 
+    ON p.product_id = s.product_id
+    """
+)   
+total_revenue = cursor.fetchone()[0]
+# Persist total revenue in the database
+cursor.execute(
+    """
+    INSERT INTO Revenues (revenue_amount, created_at) VALUES (?, ?)
+    """,
+    (total_revenue, datetime.now().timestamp())
+)
+conn.commit()
+print(f"Total revenue: {total_revenue/100}")
+
+# sqlite> SELECT SUM(s.quantity_sold), p.product_name
+#    ...> FROM sales AS s
+#    ...> INNER JOIN products AS p
+#    ...> ON p.product_id = s.product_id
+#    ...> GROUP BY p.product_id;
+
+cursor.execute(
+    """
+    SELECT SUM(s.quantity_sold), p.product_name 
+    FROM sales AS s 
+    INNER JOIN products AS p 
+    ON p.product_id = s.product_id 
+    GROUP BY p.product_id
+    """
+)
+total_quantity_sold = cursor.fetchall()
+# Persist total quantity sold by product in the database
+for quantity in total_quantity_sold:
+    cursor.execute(
+        """
+        INSERT INTO Units_sold_by_product (amount_sold_by_product, created_at, product_id) VALUES (?, ?, ?)
+        """,
+        (quantity[0], datetime.now().timestamp(), quantity[1])
+    )
+conn.commit()
+print(f"Total quantity sold: {total_quantity_sold}")
+
+# sqlite> SELECT SUM(s.quantity_sold), sh.shop_location
+#    ...> FROM sales AS s
+#    ...> INNER JOIN shops AS sh
+#    ...> ON s.shop_id = sh.shop_id
+#    ...> GROUP BY sh.shop_location;
+
+cursor.execute(
+    """
+    SELECT SUM(s.quantity_sold), sh.shop_location 
+    FROM sales AS s INNER JOIN shops 
+    AS sh ON s.shop_id = sh.shop_id 
+    GROUP BY sh.shop_location
+    """
+)
+total_quantity_sold_by_shop = cursor.fetchall()
+# Persist total quantity sold by shop in the database
+for quantity in total_quantity_sold_by_shop:
+    cursor.execute(
+        """
+        INSERT INTO Units_sold_by_town (amount_sold_by_town, created_at, shop_id) VALUES (?, ?, ?)
+        """,
+        (quantity[0], datetime.now().timestamp(), quantity[1])
+    )
+conn.commit()
+
+print(f"Total quantity sold by shop: {total_quantity_sold_by_shop}")
+
+conn.close()
 
