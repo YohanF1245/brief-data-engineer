@@ -1,12 +1,19 @@
 version: '3.8'
 
 services:
+  data-api:
+    build:
+      context: /api/.
+      dockerfile: Dockerfile
+    container_name: data-api
+    ports:
+      - "555:555"
+    volumes:
+      - ./api:/api
   sqlite:
     image: nouchka/sqlite3
     container_name: sqlite
     hostname: sqlite
-    ports:
-      - "777:777"
     volumes:
       - ./sqlite:/sqlite
     stdin_open: true
@@ -20,6 +27,7 @@ services:
     container_name: python-app
     depends_on:
       - sqlite
+      - data-api
     ports:
       - "666:666"
     volumes:
