@@ -10,7 +10,11 @@
 - [Requirements](#Requirements)
 - [Usage](#usage)
 - [Interact with the database](#interact-with-the-database)
-- [ Response to Project Brief – Notes and Answers]
+- [ Response to Project Brief – Notes and Answers](#response-to-project-brief--notes-and-answers)
+    -[Step 1 - Project architecture](#step-1---project-architecture)
+    -[Step 2 - Docker compose file](#step-2---docker-compose-file)
+    -[Step 3 - Data Analysis and Database design](#step-3---data-analysis-and-database-design)
+    -[Step 4 - SQL requests for data analysis](#step-4---sql-requests-for-data-analysis)
 ## Requirements
 - Docker
 - Docker compose
@@ -95,7 +99,7 @@ The idea is to use a select request to see if the entry already exists and setup
  if not sale_exists:
         cursor.execute(
 ```
-## Step 4 - SQL request for data analysis
+## Step 4 - SQL requests for data analysis
 - Request to calculate total revenue : 
 ```
 cursor.execute(
@@ -167,7 +171,7 @@ for quantity in total_quantity_sold_by_shop:
 conn.commit()
 ```
 - sql analysis results : 
-[!image](/docs/assets/sql-analysis-result.png)
+![image](/docs/assets/sql-analysis-result.png)
 
 
 
