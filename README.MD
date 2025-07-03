@@ -11,10 +11,10 @@
 - [Usage](#usage)
 - [Interact with the database](#interact-with-the-database)
 - [ Response to Project Brief – Notes and Answers](#response-to-project-brief--notes-and-answers)
-    -[Step 1 - Project architecture](#step-1---project-architecture)
-    -[Step 2 - Docker compose file](#step-2---docker-compose-file)
-    -[Step 3 - Data Analysis and Database design](#step-3---data-analysis-and-database-design)
-    -[Step 4 - SQL requests for data analysis](#step-4---sql-requests-for-data-analysis)
+    - [Step 1 - Project architecture](#step-1---project-architecture)
+    - [Step 2 - Docker compose file](#step-2---docker-compose-file)
+    - [Step 3 - Data Analysis and Database design](#step-3---data-analysis-and-database-design)
+    - [Step 4 - SQL requests for data analysis](#step-4---sql-requests-for-data-analysis)
 ## Requirements
 - Docker
 - Docker compose
