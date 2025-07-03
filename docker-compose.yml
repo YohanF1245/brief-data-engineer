@@ -16,6 +16,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+      
   sqlite:
     image: nouchka/sqlite3
     container_name: sqlite
@@ -25,7 +26,7 @@ services:
     stdin_open: true
     tty: true
     command: sh
-      
+
   python-app:
     build:
       context: /app/.
