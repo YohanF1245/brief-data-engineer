@@ -10,6 +10,12 @@ services:
       - "555:555"
     volumes:
       - ./api:/api
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:555/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
   sqlite:
     image: nouchka/sqlite3
     container_name: sqlite
@@ -26,8 +32,10 @@ services:
       dockerfile: Dockerfile
     container_name: python-app
     depends_on:
-      - sqlite
-      - data-api
+      sqlite:
+        condition: service_started
+      data-api:
+        condition: service_healthy
     ports:
       - "666:666"
     volumes:
